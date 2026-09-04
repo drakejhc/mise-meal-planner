@@ -49,6 +49,7 @@ const navItems: NavItem[] = [
 const mealImages = {
   teriyaki: "/manus-storage/teriyaki-chicken-bowl_680634fa.jpg",
   tacos: "/manus-storage/chicken-tacos_41c6d35b.jpg",
+  salsaVerde: "/manus-storage/salsa-verde-chicken-tacos_aa2f10f0.jpg",
   pasta: "/manus-storage/broccoli-pasta_51eeab65.jpeg",
 };
 
@@ -66,63 +67,134 @@ const mealPlan = [
   {
     day: "Monday",
     date: "Sep 8",
-    name: "Teriyaki chicken bowls",
-    details: "Chicken thighs · rice · broccoli",
+    name: "Teriyaki Grilled Chicken and Veggie Rice Bowls",
+    details: "Chicken · rice · broccoli",
     tag: "Cook tonight",
     image: mealImages.teriyaki,
-    duration: "35 min",
+    duration: "45 min",
     uses: "3 pantry items",
+    recipeId: "teriyaki-bowls",
   },
   {
     day: "Tuesday",
     date: "Sep 9",
-    name: "Chicken tacos with green salsa",
-    details: "Chicken · tortillas · avocado",
+    name: "Slow Cooker Salsa Verde Chicken Tacos",
+    details: "Chicken thighs · tomatillos · tortillas",
     tag: "Pantry-first",
-    image: mealImages.tacos,
-    duration: "30 min",
+    image: mealImages.salsaVerde,
+    duration: "5 hrs 10 min",
     uses: "4 pantry items",
+    recipeId: "chicken-tacos",
   },
   {
     day: "Wednesday",
     date: "Sep 10",
-    name: "Pasta with roasted broccoli",
-    details: "Pasta · broccoli · lemon",
+    name: "Pasta with Roasted Broccoli, Garlic and Oil",
+    details: "Pasta · broccoli · Pecorino",
     tag: "Use it up",
     image: mealImages.pasta,
-    duration: "25 min",
+    duration: "30 min",
     uses: "2 pantry items",
+    recipeId: "broccoli-pasta",
   },
   {
     day: "Thursday",
     date: "Sep 11",
-    name: "Vegetable fried rice",
-    details: "Eggs · rice · carrots · peas",
+    name: "Teriyaki Grilled Chicken and Veggie Rice Bowls",
+    details: "Chicken · rice · broccoli",
     tag: "Fast night",
     image: mealImages.teriyaki,
-    duration: "20 min",
+    duration: "45 min",
     uses: "3 pantry items",
+    recipeId: "teriyaki-bowls",
   },
   {
     day: "Friday",
     date: "Sep 12",
-    name: "Build-your-own taco night",
-    details: "Black beans · tortillas · toppings",
+    name: "Slow Cooker Salsa Verde Chicken Tacos",
+    details: "Chicken thighs · tomatillos · tortillas",
     tag: "Family favorite",
-    image: mealImages.tacos,
-    duration: "25 min",
+    image: mealImages.salsaVerde,
+    duration: "5 hrs 10 min",
     uses: "2 pantry items",
+    recipeId: "chicken-tacos",
   },
 ];
 
 type Meal = (typeof mealPlan)[number];
 
-const swapAlternatives: Record<string, Pick<Meal, "name" | "details" | "tag" | "image" | "duration" | "uses">> = {
-  Monday: { name: "Miso salmon rice bowls", details: "Salmon · rice · broccoli", tag: "Fresh swap", image: mealImages.teriyaki, duration: "30 min", uses: "2 pantry items" },
-  Tuesday: { name: "Crispy black bean tacos", details: "Black beans · tortillas · avocado", tag: "Fresh swap", image: mealImages.tacos, duration: "25 min", uses: "3 pantry items" },
-  Wednesday: { name: "Lemony broccoli pasta", details: "Pasta · broccoli · parmesan", tag: "Fresh swap", image: mealImages.pasta, duration: "20 min", uses: "3 pantry items" },
-  Thursday: { name: "Sesame egg fried rice", details: "Eggs · rice · carrots · peas", tag: "Fresh swap", image: mealImages.teriyaki, duration: "18 min", uses: "4 pantry items" },
-  Friday: { name: "Loaded taco bowls", details: "Black beans · rice · toppings", tag: "Fresh swap", image: mealImages.tacos, duration: "22 min", uses: "3 pantry items" },
+const swapAlternatives: Record<string, Pick<Meal, "name" | "details" | "tag" | "image" | "duration" | "uses" | "recipeId">> = {
+  Monday: { name: "Slow Cooker Salsa Verde Chicken Tacos", details: "Chicken thighs · tomatillos · tortillas", tag: "Real recipe swap", image: mealImages.salsaVerde, duration: "5 hrs 10 mins", uses: "2 pantry items", recipeId: "chicken-tacos" },
+  Tuesday: { name: "Teriyaki Grilled Chicken and Veggie Rice Bowls", details: "Chicken · rice · broccoli", tag: "Real recipe swap", image: mealImages.teriyaki, duration: "45 min", uses: "3 pantry items", recipeId: "teriyaki-bowls" },
+  Wednesday: { name: "Pasta with Roasted Broccoli, Garlic and Oil", details: "Pasta · broccoli · Pecorino", tag: "Real recipe swap", image: mealImages.pasta, duration: "30 min", uses: "3 pantry items", recipeId: "broccoli-pasta" },
+  Thursday: { name: "Teriyaki Grilled Chicken and Veggie Rice Bowls", details: "Chicken · rice · broccoli", tag: "Real recipe swap", image: mealImages.teriyaki, duration: "45 min", uses: "3 pantry items", recipeId: "teriyaki-bowls" },
+  Friday: { name: "Slow Cooker Salsa Verde Chicken Tacos", details: "Chicken thighs · tomatillos · tortillas", tag: "Real recipe swap", image: mealImages.salsaVerde, duration: "5 hrs 10 mins", uses: "2 pantry items", recipeId: "chicken-tacos" },
+};
+
+type RecipeDetail = {
+  name: string;
+  sourceName: string;
+  sourceUrl: string;
+  image: string;
+  imageAttribution: string;
+  prepTime: string;
+  cookTime: string;
+  totalTime: string;
+  servings: string;
+  ingredientGroups: { label: string; items: string[] }[];
+  instructions: string[];
+  notes: string[];
+};
+
+const recipeDetails: Record<string, RecipeDetail> = {
+  "teriyaki-bowls": {
+    name: "Teriyaki Grilled Chicken and Veggie Rice Bowls",
+    sourceName: "Cooking Classy",
+    sourceUrl: "https://www.cookingclassy.com/teriyaki-grilled-chicken-and-veggie-rice-bowls/",
+    image: mealImages.teriyaki,
+    imageAttribution: "Photo from the Cooking Classy recipe page",
+    prepTime: "20 min",
+    cookTime: "25 min",
+    totalTime: "45 min",
+    servings: "4 servings",
+    ingredientGroups: [
+      { label: "Teriyaki sauce", items: ["½ cup low-sodium soy sauce", "½ cup water, divided", "3 Tbsp packed light-brown sugar", "3 Tbsp honey", "3 cloves garlic, minced", "1 Tbsp minced ginger", "1 Tbsp rice vinegar", "1½ Tbsp cornstarch"] },
+      { label: "Chicken, vegetables & rice", items: ["1½ lb boneless skinless chicken breasts", "3½ Tbsp olive oil, divided", "1 medium zucchini, diced", "1½ cups matchstick carrots", "2½ cups small-diced broccoli florets", "1½–2 cups cooked white or brown rice", "Black pepper and sesame seeds"] },
+    ],
+    instructions: ["Whisk soy sauce, ¼ cup plus 2 Tbsp water, sugar, honey, garlic, ginger, and rice vinegar in a saucepan; bring to a light boil.", "Whisk cornstarch with the remaining 2 Tbsp water, add it to the sauce, and boil 1 minute while stirring. Remove from heat.", "Brush chicken with 1½ Tbsp oil and pepper. Heat a grill to 425–450°F; grill about 4 minutes per side until the center reaches 160–165°F. Rest 5 minutes, then dice.", "Sauté zucchini, broccoli, and carrots in the remaining oil over medium-high heat for 4–5 minutes, until crisp-tender.", "Layer rice into 4 bowls, top with chicken and vegetables, drizzle with teriyaki sauce, and finish with sesame seeds."],
+    notes: ["The source allows white or brown rice and notes a preference for short-grain brown rice.", "Frozen vegetables, snap peas, or bell peppers are listed as source-provided variations."],
+  },
+  "chicken-tacos": {
+    name: "Slow Cooker Salsa Verde Chicken Tacos",
+    sourceName: "Serious Eats",
+    sourceUrl: "https://www.seriouseats.com/slow-cooker-salsa-verde-chicken-tacos-recipe-11908997",
+    image: mealImages.salsaVerde,
+    imageAttribution: "Serious Eats / Lorena Masso",
+    prepTime: "10 min",
+    cookTime: "5 hrs",
+    totalTime: "5 hrs 10 min",
+    servings: "6–8 servings",
+    ingredientGroups: [
+      { label: "Salsa verde", items: ["1 lb tomatillos, halved (or one 11-oz can, drained)", "2 poblano chiles, sliced", "1 small onion, finely chopped", "2 serrano or jalapeño chiles, finely chopped", "1 cup cilantro leaves and tender stems, divided", "3 Tbsp neutral oil", "3 cloves garlic, minced", "2 tsp Diamond Crystal kosher salt, divided", "1 tsp dried oregano", "½ tsp black pepper", "½ tsp ground coriander"] },
+      { label: "Chicken & serving", items: ["3 lb boneless skinless chicken thighs", "1 Tbsp fresh lime juice, plus more to taste", "12–18 warm, lightly charred corn tortillas", "Optional toppings: crema, radishes, guacamole, or hot sauce"] },
+    ],
+    instructions: ["Combine tomatillos, poblanos, onion, serrano or jalapeño, ½ cup cilantro, oil, garlic, 1 tsp salt, oregano, pepper, and coriander in a slow cooker.", "Season chicken with the remaining 1 tsp salt. Nestle it into the slow cooker and toss to coat.", "Cover and cook on Low, stirring halfway through, until the chicken is pull-apart tender, 4–5 hours.", "Shred the chicken into bite-size pieces inside the slow-cooker crock.", "Stir in the remaining ½ cup cilantro and lime juice. Adjust salt, pepper, and lime to taste; serve with warm tortillas and toppings."],
+    notes: ["The source allows fresh tomatillos to be replaced with one drained 11-oz can.", "For milder heat, remove chile seeds and ribs or adjust the chile quantity."],
+  },
+  "broccoli-pasta": {
+    name: "Pasta with Roasted Broccoli, Garlic and Oil",
+    sourceName: "Skinnytaste",
+    sourceUrl: "https://www.skinnytaste.com/pasta-with-roasted-broccoli/",
+    image: mealImages.pasta,
+    imageAttribution: "Photo from the Skinnytaste recipe page",
+    prepTime: "10 min",
+    cookTime: "20 min",
+    totalTime: "30 min",
+    servings: "4 servings",
+    ingredientGroups: [{ label: "Ingredients", items: ["8 oz pasta", "1½ lb broccoli florets", "6–8 cloves garlic, smashed", "2 Tbsp extra virgin olive oil", "Kosher salt and fresh pepper", "¼ cup freshly grated Pecorino Romano"] }],
+    instructions: ["Preheat the oven to 450°F.", "Combine broccoli, olive oil, garlic, salt, and pepper in a baking dish.", "Roast about 20 minutes, tossing halfway, until browned and tender.", "Meanwhile, boil salted water and cook pasta according to package directions for al dente.", "Reserve 1 cup pasta water, then drain the pasta and toss it with the roasted broccoli.", "Add ½ cup reserved pasta water, Pecorino Romano, and salt and pepper to taste; add more water if needed."],
+    notes: ["The source notes that crushed red pepper is a useful optional addition for more heat."],
+  },
 };
 
 const pantryGroups = [
@@ -161,27 +233,27 @@ const groceryGroups = [
     name: "Produce",
     color: "bg-[#dfe9ce] text-[#4f662f]",
     items: [
-      { id: "gochujang", name: "Gochujang", quantity: "1 small tub", recipe: "Teriyaki bowls" },
-      { id: "avocado", name: "Avocados", quantity: "3", recipe: "Taco night" },
-      { id: "lime", name: "Limes", quantity: "4", recipe: "Taco night" },
-      { id: "cilantro", name: "Cilantro", quantity: "1 bunch", recipe: "Tacos + fried rice" },
+      { id: "tomatillos", name: "Tomatillos", quantity: "1 lb", recipe: "Salsa verde tacos" },
+      { id: "poblanos", name: "Poblano chiles", quantity: "2", recipe: "Salsa verde tacos" },
+      { id: "cilantro", name: "Fresh cilantro", quantity: "1 cup", recipe: "Salsa verde tacos" },
+      { id: "zucchini", name: "Zucchini", quantity: "1 medium", recipe: "Teriyaki bowls" },
     ],
   },
   {
     name: "Pantry",
     color: "bg-[#f4e3c9] text-[#825a24]",
     items: [
-      { id: "tortillas", name: "Corn tortillas", quantity: "1 pack", recipe: "Taco night" },
-      { id: "peas", name: "Frozen peas", quantity: "1 bag", recipe: "Fried rice" },
-      { id: "coconut", name: "Coconut milk", quantity: "1 can", recipe: "Friday tacos" },
+      { id: "soy-sauce", name: "Low-sodium soy sauce", quantity: "½ cup", recipe: "Teriyaki bowls" },
+      { id: "tortillas", name: "Corn tortillas", quantity: "12–18", recipe: "Salsa verde tacos" },
+      { id: "pecorino", name: "Pecorino Romano", quantity: "¼ cup", recipe: "Roasted broccoli pasta" },
     ],
   },
   {
-    name: "Dairy & eggs",
+    name: "Protein",
     color: "bg-[#e9e2f5] text-[#6b5791]",
     items: [
-      { id: "yogurt", name: "Greek yogurt", quantity: "1 tub", recipe: "Lunches" },
-      { id: "feta", name: "Feta", quantity: "1 block", recipe: "Pasta" },
+      { id: "chicken-breasts", name: "Chicken breasts", quantity: "1½ lb", recipe: "Teriyaki bowls" },
+      { id: "chicken-thighs", name: "Chicken thighs", quantity: "3 lb", recipe: "Salsa verde tacos" },
     ],
   },
 ];
@@ -248,7 +320,7 @@ function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; 
   );
 }
 
-function TodayPage({ goTo, meals, onCook, onSwap }: { goTo: (path: string) => void; meals: Meal[]; onCook: (meal: Meal) => void; onSwap: (day: string) => void }) {
+function TodayPage({ goTo, meals, onCook, onSwap, onRecipe }: { goTo: (path: string) => void; meals: Meal[]; onCook: (meal: Meal) => void; onSwap: (day: string) => void; onRecipe: (meal: Meal) => void }) {
   const [selectedDay, setSelectedDay] = useState("8");
   const selectedMeal = meals.find((meal) => meal.date.endsWith(selectedDay)) ?? meals[0];
   const upcomingMeals = meals.filter((meal) => meal.day !== selectedMeal.day).slice(0, 3);
@@ -318,6 +390,9 @@ function TodayPage({ goTo, meals, onCook, onSwap }: { goTo: (path: string) => vo
                 <button className="rounded-xl bg-[#f3f0e8] px-4 py-2.5 text-sm font-bold text-[#303d21] transition duration-150 hover:bg-white active:scale-[0.97]" onClick={() => onCook(selectedMeal)} type="button">
                   Start cooking
                 </button>
+                <button className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition duration-150 hover:bg-white/10 active:scale-[0.97]" onClick={() => onRecipe(selectedMeal)} type="button">
+                  View recipe
+                </button>
                 <button className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition duration-150 hover:bg-white/10 active:scale-[0.97]" onClick={() => onSwap(selectedMeal.day)} type="button">
                   Swap meal
                 </button>
@@ -373,7 +448,7 @@ function PantryPage({ addItem, addedItems }: { addItem: () => void; addedItems: 
       <PageHeader
         eyebrow="Your kitchen, at a glance"
         title="Pantry"
-        description="Keep the essentials in view. The next plan will lean on what you have first."
+        description={addedItems.length > 0 ? `${addedItems.join(", ")} added in this demo. The next plan will lean on what you have first.` : "Keep the essentials in view. The next plan will lean on what you have first."}
         action={
           <button className="primary-button" onClick={addItem} type="button"><CirclePlus className="h-4 w-4" /> Add item</button>
         }
@@ -421,7 +496,7 @@ function PantryPage({ addItem, addedItems }: { addItem: () => void; addedItems: 
   );
 }
 
-function MealPlanPage({ goTo, meals, onCook, onSwap }: { goTo: (path: string) => void; meals: Meal[]; onCook: (meal: Meal) => void; onSwap: (day: string) => void }) {
+function MealPlanPage({ goTo, meals, onCook, onSwap, onRecipe }: { goTo: (path: string) => void; meals: Meal[]; onCook: (meal: Meal) => void; onSwap: (day: string) => void; onRecipe: (meal: Meal) => void }) {
   return (
     <>
       <PageHeader
@@ -456,6 +531,7 @@ function MealPlanPage({ goTo, meals, onCook, onSwap }: { goTo: (path: string) =>
             </div>
             <div className="flex shrink-0 flex-col justify-between py-1 sm:flex-row sm:items-center sm:gap-2">
               <button className="rounded-lg p-2 text-[#8b8d80] transition hover:bg-[#f4f4ef] hover:text-[#4d523f]" onClick={() => onSwap(meal.day)} type="button" aria-label={`Swap ${meal.name}`}><MoreHorizontal className="h-4 w-4" /></button>
+              <button className="hidden rounded-xl border border-[#e2e2d8] px-3 py-2 text-xs font-bold text-[#596247] transition hover:border-[#c7cfb8] hover:bg-[#f4f6ed] sm:block" onClick={() => onRecipe(meal)} type="button">Recipe</button>
               <button className="hidden rounded-xl border border-[#e2e2d8] px-3 py-2 text-xs font-bold text-[#596247] transition hover:border-[#c7cfb8] hover:bg-[#f4f6ed] sm:block" onClick={() => onSwap(meal.day)} type="button">Swap</button>
             </div>
           </article>
@@ -581,20 +657,36 @@ function SettingsPage() {
   );
 }
 
-function CookMode({ meal, onClose }: { meal: Meal; onClose: () => void }) {
+function RecipeReader({ recipe, onClose, onCook }: { recipe: RecipeDetail; onClose: () => void; onCook: () => void }) {
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-[#1c2415]/45 p-0 backdrop-blur-sm sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={recipe.name}>
+      <div className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-t-[1.8rem] bg-[#fbfaf5] shadow-[0_25px_80px_rgba(20,28,15,0.28)] sm:rounded-[1.8rem]">
+        <div className="grid lg:grid-cols-[0.82fr_1fr]">
+          <div className="relative min-h-[220px] lg:min-h-[560px]"><img alt={recipe.name} className="h-full w-full object-cover" src={recipe.image} /><div className="absolute inset-0 bg-gradient-to-t from-[#18210f]/65 via-transparent to-transparent" /><p className="absolute bottom-4 left-5 right-5 text-[10px] font-semibold text-white/80">{recipe.imageAttribution}</p></div>
+          <div className="p-5 sm:p-7"><div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#76845d]">Recipe from the web</p><h2 className="mt-1 font-display text-3xl font-semibold leading-[1.05] tracking-[-0.055em] text-[#32372a]">{recipe.name}</h2></div><button aria-label="Close recipe" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#eef0e7] text-xl text-[#687253]" onClick={onClose} type="button">×</button></div>
+            <p className="mt-3 text-sm text-[#73776a]">Source: <a className="font-bold text-[#5f7048] underline decoration-[#c8d2b5] underline-offset-2" href={recipe.sourceUrl} rel="noreferrer" target="_blank">{recipe.sourceName} ↗</a></p>
+            <div className="mt-5 grid grid-cols-4 gap-2 rounded-2xl bg-[#f0f2e9] p-3 text-center"><div><p className="font-display text-lg font-semibold text-[#3b4930]">{recipe.prepTime}</p><p className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#858d78]">Prep</p></div><div><p className="font-display text-lg font-semibold text-[#3b4930]">{recipe.cookTime}</p><p className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#858d78]">Cook</p></div><div><p className="font-display text-lg font-semibold text-[#3b4930]">{recipe.totalTime}</p><p className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#858d78]">Total</p></div><div><p className="font-display text-lg font-semibold text-[#3b4930]">{recipe.servings.split(" ")[0]}</p><p className="text-[9px] font-bold uppercase tracking-[0.08em] text-[#858d78]">Servings</p></div></div>
+            <div className="mt-6"><h3 className="font-display text-xl font-semibold tracking-[-0.04em] text-[#3b4034]">Ingredients</h3>{recipe.ingredientGroups.map((group) => <div className="mt-4" key={group.label}><p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#8b927f]">{group.label}</p><ul className="mt-2 space-y-1.5 text-sm leading-5 text-[#60655a]">{group.items.map((item) => <li className="flex gap-2" key={item}><span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[#8b9a6e]" />{item}</li>)}</ul></div>)}</div>
+            <div className="mt-7"><h3 className="font-display text-xl font-semibold tracking-[-0.04em] text-[#3b4034]">Instructions</h3><ol className="mt-3 space-y-3">{recipe.instructions.map((step, index) => <li className="flex gap-3 text-sm leading-5 text-[#60655a]" key={step}><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#e7eddc] text-xs font-bold text-[#5d7043]">{index + 1}</span><span>{step}</span></li>)}</ol></div>
+            <div className="mt-6 rounded-2xl bg-[#f6efe3] p-4"><p className="text-[10px] font-bold uppercase tracking-[0.13em] text-[#a36f43]">Notes from the source</p><ul className="mt-2 space-y-1.5 text-xs leading-5 text-[#776956]">{recipe.notes.map((note) => <li key={note}>• {note}</li>)}</ul></div>
+            <div className="mt-6 flex gap-2.5"><button className="soft-button flex-1 justify-center" onClick={onClose} type="button">Close</button><button className="primary-button flex-1 justify-center" onClick={onCook} type="button">Cook this <ArrowRight className="h-4 w-4" /></button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CookMode({ meal, recipe, onClose }: { meal: Meal; recipe: RecipeDetail; onClose: () => void }) {
   const [step, setStep] = useState(0);
-  const steps = [
-    `Prep your ingredients for ${meal.name.toLowerCase()}.`,
-    "Warm a large pan and cook the main ingredients until golden.",
-    "Add the sauce, toss everything together, and serve warm.",
-  ];
+  const steps = recipe.instructions;
   const isComplete = step === steps.length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#1c2415]/45 p-0 backdrop-blur-sm sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`Cook ${meal.name}`}>
       <div className="w-full max-w-lg rounded-t-[1.8rem] bg-[#fbfaf5] p-5 shadow-[0_25px_80px_rgba(20,28,15,0.28)] sm:rounded-[1.8rem] sm:p-7">
-        <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#76845d]">Cook mode</p><h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em] text-[#32372a]">{meal.name}</h2></div><button aria-label="Close cook mode" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef0e7] text-xl text-[#687253]" onClick={onClose} type="button">×</button></div>
-        <div className="mt-6 rounded-[1.25rem] bg-[#edf1e4] p-5"><div className="flex items-center justify-between text-xs font-bold text-[#687450]"><span>{isComplete ? "Ready to serve" : `Step ${step + 1} of ${steps.length}`}</span><span>{isComplete ? "100%" : `${Math.round((step / steps.length) * 100)}%`}</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#d7dfc8]"><div className="h-full rounded-full bg-[#718456] transition-[width] duration-300" style={{ width: `${isComplete ? 100 : Math.max(8, (step / steps.length) * 100)}%` }} /></div><p className="mt-5 font-display text-xl leading-7 text-[#39432f]">{isComplete ? "Dinner is ready. Take the win." : steps[step]}</p></div>
+        <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#76845d]">Cook mode · {recipe.sourceName}</p><h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em] text-[#32372a]">{recipe.name}</h2></div><button aria-label="Close cook mode" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef0e7] text-xl text-[#687253]" onClick={onClose} type="button">×</button></div>
+        <div className="mt-6 rounded-[1.25rem] bg-[#edf1e4] p-5"><div className="flex items-center justify-between text-xs font-bold text-[#687450]"><span>{isComplete ? "Ready to serve" : `Step ${step + 1} of ${steps.length}`}</span><span>{isComplete ? "100%" : `${Math.round(((step + 1) / steps.length) * 100)}%`}</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#d7dfc8]"><div className="h-full rounded-full bg-[#718456] transition-[width] duration-300" style={{ width: `${isComplete ? 100 : Math.max(8, ((step + 1) / steps.length) * 100)}%` }} /></div><p className="mt-5 font-display text-xl leading-7 text-[#39432f]">{isComplete ? "Dinner is ready. Take the win." : steps[step]}</p></div>
         <div className="mt-5 flex gap-2.5"><button className="soft-button flex-1 justify-center" onClick={onClose} type="button">Save for later</button><button className="primary-button flex-1 justify-center" onClick={() => setStep((current) => Math.min(steps.length, current + 1))} type="button">{isComplete ? "Done" : "Next step"}<ArrowRight className="h-4 w-4" /></button></div>
       </div>
     </div>
@@ -606,6 +698,7 @@ export default function Home() {
   const activePage = useAppPage(location);
   const [meals, setMeals] = useState<Meal[]>(mealPlan);
   const [cookingMeal, setCookingMeal] = useState<Meal | null>(null);
+  const [recipeMeal, setRecipeMeal] = useState<Meal | null>(null);
   const [pantryExtras, setPantryExtras] = useState<string[]>([]);
   const [checkedGroceries, setCheckedGroceries] = useState<string[]>([]);
 
@@ -637,6 +730,8 @@ export default function Home() {
     setMeals((previous) => previous.map((meal) => meal.day === day ? { ...meal, ...alternative } : meal));
     toast.success(`${day}'s dinner swapped.`, { description: alternative.name });
   };
+
+  const openRecipe = (meal: Meal) => setRecipeMeal(meal);
 
   const currentLabel = navItems.find((item) => item.id === activePage)?.label ?? "Today";
 
@@ -677,9 +772,9 @@ export default function Home() {
       <main className="pb-24 pt-7 lg:ml-[236px] lg:pb-12 lg:pt-10">
         <div className="mx-auto max-w-[1180px] px-4 sm:px-7 lg:px-8">
           <div className="page-enter">
-            {activePage === "dashboard" && <TodayPage goTo={goTo} meals={meals} onCook={setCookingMeal} onSwap={swapMeal} />}
+            {activePage === "dashboard" && <TodayPage goTo={goTo} meals={meals} onCook={setCookingMeal} onSwap={swapMeal} onRecipe={openRecipe} />}
             {activePage === "pantry" && <PantryPage addItem={addPantryItem} addedItems={pantryExtras} />}
-            {activePage === "meal-plan" && <MealPlanPage goTo={goTo} meals={meals} onCook={setCookingMeal} onSwap={swapMeal} />}
+            {activePage === "meal-plan" && <MealPlanPage goTo={goTo} meals={meals} onCook={setCookingMeal} onSwap={swapMeal} onRecipe={openRecipe} />}
             {activePage === "grocery-list" && <GroceryListPage checked={checkedGroceries} toggleItem={toggleGrocery} />}
             {activePage === "settings" && <SettingsPage />}
           </div>
@@ -693,7 +788,8 @@ export default function Home() {
           return <button className={`mobile-nav-button ${isActive ? "mobile-nav-active" : ""}`} key={item.id} onClick={() => goTo(item.path)} type="button"><span className={`flex h-7 w-7 items-center justify-center rounded-lg ${isActive ? "bg-[#e5ebd9]" : ""}`}><Icon className="h-4 w-4" /></span><span>{item.label === "Meal plan" ? "Plan" : item.label}</span></button>;
         })}
       </nav>
-      {cookingMeal && <CookMode meal={cookingMeal} onClose={() => setCookingMeal(null)} />}
+      {recipeMeal && <RecipeReader recipe={recipeDetails[recipeMeal.recipeId]} onClose={() => setRecipeMeal(null)} onCook={() => { setRecipeMeal(null); setCookingMeal(recipeMeal); }} />}
+      {cookingMeal && <CookMode meal={cookingMeal} recipe={recipeDetails[cookingMeal.recipeId]} onClose={() => setCookingMeal(null)} />}
     </div>
   );
 }
