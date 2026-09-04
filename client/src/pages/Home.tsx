@@ -202,12 +202,14 @@ function WeekStrip({ selectedDay, setSelectedDay }: { selectedDay: string; setSe
       <div className="flex min-w-max gap-1.5">
         {weekDays.map((item) => {
           const active = selectedDay === item.date;
+          const isPlanned = Number(item.date) <= 12;
           return (
             <button
               aria-label={`${item.weekday}, September ${item.date}`}
               className={`group flex w-[48px] flex-col items-center rounded-2xl py-2.5 transition-all duration-200 ${
-                active ? "bg-[#2f3b22] text-white shadow-[0_6px_14px_rgba(47,59,34,0.18)]" : "text-[#8b8c7b] hover:bg-[#efefe8]"
+                active ? "bg-[#2f3b22] text-white shadow-[0_6px_14px_rgba(47,59,34,0.18)]" : isPlanned ? "text-[#8b8c7b] hover:bg-[#efefe8]" : "text-[#b9baaf]"
               }`}
+              disabled={!isPlanned}
               key={item.date}
               onClick={() => setSelectedDay(item.date)}
               type="button"
@@ -238,6 +240,8 @@ function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; 
 
 function TodayPage({ goTo }: { goTo: (path: string) => void }) {
   const [selectedDay, setSelectedDay] = useState("8");
+  const selectedMeal = mealPlan.find((meal) => meal.date.endsWith(selectedDay)) ?? mealPlan[0];
+  const upcomingMeals = mealPlan.filter((meal) => meal.day !== selectedMeal.day).slice(0, 3);
 
   return (
     <>
@@ -275,29 +279,29 @@ function TodayPage({ goTo }: { goTo: (path: string) => void }) {
       <section className="mt-7 overflow-hidden rounded-[1.6rem] bg-[#364326] text-white shadow-[0_20px_45px_rgba(40,53,27,0.18)] sm:mt-8">
         <div className="grid lg:grid-cols-[1.02fr_1fr]">
           <div className="relative min-h-[252px] overflow-hidden lg:min-h-[335px] lg:order-2">
-            <img alt="Teriyaki chicken and vegetables over rice" className="h-full w-full object-cover" src={mealImages.teriyaki} />
+            <img alt={selectedMeal.name} className="h-full w-full object-cover" src={selectedMeal.image} />
             <div className="absolute inset-0 bg-gradient-to-t from-[#17200f]/40 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 rounded-full bg-[#1e2915]/85 px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm">35 min · serves 4</div>
+            <div className="absolute bottom-4 left-4 rounded-full bg-[#1e2915]/85 px-3 py-1.5 text-[11px] font-bold backdrop-blur-sm">{selectedMeal.duration} · serves 4</div>
           </div>
           <div className="relative p-6 sm:p-8 lg:order-1 lg:p-9">
             <div className="absolute -left-8 -top-7 h-28 w-28 rounded-full bg-[#596b40] opacity-30 blur-2xl" />
             <div className="relative">
               <div className="mb-4 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#728455] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#f0f4e7]">
-                  <Flame className="h-3 w-3" /> Tonight
+                  <Flame className="h-3 w-3" /> {selectedMeal.day === "Monday" ? "Tonight" : "Up next"}
                 </span>
-                <span className="text-xs text-[#cbd4bc]">Mon, Sep 8</span>
+                <span className="text-xs text-[#cbd4bc]">{selectedMeal.day}, {selectedMeal.date}</span>
               </div>
-              <h2 className="max-w-sm font-display text-3xl font-semibold leading-[1.03] tracking-[-0.055em] sm:text-[2.5rem]">Teriyaki chicken bowls</h2>
-              <p className="mt-3 text-sm leading-6 text-[#d6ddca]">Sweet, savory, and mostly waiting for you in the kitchen already.</p>
+              <h2 className="max-w-sm font-display text-3xl font-semibold leading-[1.03] tracking-[-0.055em] sm:text-[2.5rem]">{selectedMeal.name}</h2>
+              <p className="mt-3 text-sm leading-6 text-[#d6ddca]">{selectedMeal.day === "Monday" ? "Sweet, savory, and mostly waiting for you in the kitchen already." : "A low-lift dinner that keeps the rest of the week moving."}</p>
               <div className="mt-6 space-y-2.5 border-y border-white/10 py-4 text-sm">
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[#bfc9b0]">Uses from your pantry</span>
-                  <span className="font-semibold text-white">chicken, rice, broccoli</span>
+                  <span className="font-semibold text-white">{selectedMeal.details.split(" · ").slice(0, 3).join(", ")}</span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[#bfc9b0]">Still to pick up</span>
-                  <span className="font-semibold text-[#f0d2a7]">gochujang, sesame oil</span>
+                  <span className="font-semibold text-[#f0d2a7]">{selectedMeal.day === "Monday" ? "gochujang, sesame oil" : "a few fresh toppings"}</span>
                 </div>
               </div>
               <div className="mt-6 flex flex-wrap gap-2.5">
@@ -325,7 +329,7 @@ function TodayPage({ goTo }: { goTo: (path: string) => void }) {
             </button>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-            {mealPlan.slice(1, 4).map((meal) => (
+            {upcomingMeals.map((meal) => (
               <button className="meal-preview group text-left" key={meal.day} onClick={() => goTo("/meal-plan")} type="button">
                 <div className="relative h-28 overflow-hidden rounded-2xl sm:h-32">
                   <img alt={meal.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" src={meal.image} />
@@ -454,6 +458,7 @@ function MealPlanPage({ goTo }: { goTo: (path: string) => void }) {
 
 function GroceryListPage({ checked, toggleItem }: { checked: string[]; toggleItem: (id: string) => void }) {
   const allItems = groceryGroups.flatMap((group) => group.items);
+  const progress = Math.round((checked.length / allItems.length) * 100);
   const completeAll = () => {
     const ids = allItems.map((item) => item.id);
     if (checked.length === ids.length) {
@@ -474,7 +479,7 @@ function GroceryListPage({ checked, toggleItem }: { checked: string[]; toggleIte
         }
       />
       <section className="overflow-hidden rounded-[1.5rem] bg-[#40342b] p-5 text-white shadow-[0_18px_38px_rgba(59,46,34,0.16)] sm:p-6">
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
+          <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-[#d8c5a9]">This week’s shop</p>
             <div className="mt-1 flex items-end gap-3"><p className="font-display text-4xl font-semibold tracking-[-0.06em]">$73</p><p className="mb-1 text-sm text-[#ded1c1]">estimated total</p></div>
@@ -483,8 +488,12 @@ function GroceryListPage({ checked, toggleItem }: { checked: string[]; toggleIte
             <div><p className="font-display text-xl font-semibold">9</p><p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#c6bbaa]">Items</p></div>
             <div><p className="font-display text-xl font-semibold">3</p><p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#c6bbaa]">Aisles</p></div>
             <div><p className="font-display text-xl font-semibold">5</p><p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#c6bbaa]">Dinners</p></div>
+            </div>
           </div>
-        </div>
+          <div className="mt-5 border-t border-white/15 pt-4">
+            <div className="mb-2 flex items-center justify-between text-[11px] font-semibold text-[#d6c9ba]"><span>{progress === 100 ? "Everything is ready for the week" : `${progress}% of your shop is picked up`}</span><span>{checked.length}/{allItems.length}</span></div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-[#cddba8] transition-[width] duration-300" style={{ width: `${progress}%` }} /></div>
+          </div>
       </section>
       <div className="mt-6 flex items-center justify-between">
         <p className="text-sm text-[#797b70]"><strong className="text-[#4e5146]">{checked.length}</strong> of {allItems.length} picked up</p>
@@ -560,7 +569,13 @@ export default function Home() {
   };
 
   const toggleGrocery = (id: string) => {
-    setCheckedGroceries((previous) => previous.includes(id) ? previous.filter((item) => item !== id) : [...previous, id]);
+    setCheckedGroceries((previous) => {
+      const next = previous.includes(id) ? previous.filter((item) => item !== id) : [...previous, id];
+      if (next.length === groceryGroups.flatMap((group) => group.items).length) {
+        toast.success("Shop complete", { description: "You have everything for this week’s plan." });
+      }
+      return next;
+    });
   };
 
   const addPantryItem = () => {
