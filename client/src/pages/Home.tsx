@@ -115,6 +115,16 @@ const mealPlan = [
   },
 ];
 
+type Meal = (typeof mealPlan)[number];
+
+const swapAlternatives: Record<string, Pick<Meal, "name" | "details" | "tag" | "image" | "duration" | "uses">> = {
+  Monday: { name: "Miso salmon rice bowls", details: "Salmon · rice · broccoli", tag: "Fresh swap", image: mealImages.teriyaki, duration: "30 min", uses: "2 pantry items" },
+  Tuesday: { name: "Crispy black bean tacos", details: "Black beans · tortillas · avocado", tag: "Fresh swap", image: mealImages.tacos, duration: "25 min", uses: "3 pantry items" },
+  Wednesday: { name: "Lemony broccoli pasta", details: "Pasta · broccoli · parmesan", tag: "Fresh swap", image: mealImages.pasta, duration: "20 min", uses: "3 pantry items" },
+  Thursday: { name: "Sesame egg fried rice", details: "Eggs · rice · carrots · peas", tag: "Fresh swap", image: mealImages.teriyaki, duration: "18 min", uses: "4 pantry items" },
+  Friday: { name: "Loaded taco bowls", details: "Black beans · rice · toppings", tag: "Fresh swap", image: mealImages.tacos, duration: "22 min", uses: "3 pantry items" },
+};
+
 const pantryGroups = [
   {
     name: "Use soon",
@@ -238,10 +248,10 @@ function PageHeader({ eyebrow, title, description, action }: { eyebrow: string; 
   );
 }
 
-function TodayPage({ goTo }: { goTo: (path: string) => void }) {
+function TodayPage({ goTo, meals, onCook, onSwap }: { goTo: (path: string) => void; meals: Meal[]; onCook: (meal: Meal) => void; onSwap: (day: string) => void }) {
   const [selectedDay, setSelectedDay] = useState("8");
-  const selectedMeal = mealPlan.find((meal) => meal.date.endsWith(selectedDay)) ?? mealPlan[0];
-  const upcomingMeals = mealPlan.filter((meal) => meal.day !== selectedMeal.day).slice(0, 3);
+  const selectedMeal = meals.find((meal) => meal.date.endsWith(selectedDay)) ?? meals[0];
+  const upcomingMeals = meals.filter((meal) => meal.day !== selectedMeal.day).slice(0, 3);
 
   return (
     <>
@@ -305,10 +315,10 @@ function TodayPage({ goTo }: { goTo: (path: string) => void }) {
                 </div>
               </div>
               <div className="mt-6 flex flex-wrap gap-2.5">
-                <button className="rounded-xl bg-[#f3f0e8] px-4 py-2.5 text-sm font-bold text-[#303d21] transition duration-150 hover:bg-white active:scale-[0.97]" onClick={() => toast("Recipe view is ready for the next build phase.", { description: "This frontend prototype does not load recipe instructions yet." })} type="button">
+                <button className="rounded-xl bg-[#f3f0e8] px-4 py-2.5 text-sm font-bold text-[#303d21] transition duration-150 hover:bg-white active:scale-[0.97]" onClick={() => onCook(selectedMeal)} type="button">
                   Start cooking
                 </button>
-                <button className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition duration-150 hover:bg-white/10 active:scale-[0.97]" onClick={() => goTo("/meal-plan")} type="button">
+                <button className="rounded-xl border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition duration-150 hover:bg-white/10 active:scale-[0.97]" onClick={() => onSwap(selectedMeal.day)} type="button">
                   Swap meal
                 </button>
               </div>
@@ -357,7 +367,7 @@ function TodayPage({ goTo }: { goTo: (path: string) => void }) {
   );
 }
 
-function PantryPage({ addItem }: { addItem: () => void }) {
+function PantryPage({ addItem, addedItems }: { addItem: () => void; addedItems: string[] }) {
   return (
     <>
       <PageHeader
@@ -411,7 +421,7 @@ function PantryPage({ addItem }: { addItem: () => void }) {
   );
 }
 
-function MealPlanPage({ goTo }: { goTo: (path: string) => void }) {
+function MealPlanPage({ goTo, meals, onCook, onSwap }: { goTo: (path: string) => void; meals: Meal[]; onCook: (meal: Meal) => void; onSwap: (day: string) => void }) {
   return (
     <>
       <PageHeader
@@ -427,7 +437,7 @@ function MealPlanPage({ goTo }: { goTo: (path: string) => void }) {
         <button className="inline-flex items-center gap-1.5 font-bold text-[#65734a] hover:text-[#394829]" onClick={() => goTo("/grocery-list")} type="button">Review groceries <ArrowRight className="h-4 w-4" /></button>
       </section>
       <section className="space-y-3">
-        {mealPlan.map((meal, index) => (
+        {meals.map((meal, index) => (
           <article className="group flex gap-3 rounded-[1.35rem] border border-[#e5e2d9] bg-white p-3 shadow-[0_8px_20px_rgba(56,47,34,0.03)] transition duration-200 hover:border-[#d7d8ca] hover:shadow-[0_12px_30px_rgba(56,47,34,0.06)] sm:gap-5 sm:p-4" key={meal.day}>
             <div className="hidden shrink-0 items-center text-[#c2c2b8] sm:flex"><GripVertical className="h-5 w-5" /></div>
             <div className="w-11 shrink-0 pt-1 text-center sm:w-14">
@@ -445,8 +455,8 @@ function MealPlanPage({ goTo }: { goTo: (path: string) => void }) {
               <p className="mt-2 hidden text-xs font-semibold text-[#728157] sm:block">{meal.uses}</p>
             </div>
             <div className="flex shrink-0 flex-col justify-between py-1 sm:flex-row sm:items-center sm:gap-2">
-              <button className="rounded-lg p-2 text-[#8b8d80] transition hover:bg-[#f4f4ef] hover:text-[#4d523f]" onClick={() => toast("Swap options will be available with meal generation.")} type="button" aria-label={`Swap ${meal.name}`}><MoreHorizontal className="h-4 w-4" /></button>
-              <button className="hidden rounded-xl border border-[#e2e2d8] px-3 py-2 text-xs font-bold text-[#596247] transition hover:border-[#c7cfb8] hover:bg-[#f4f6ed] sm:block" onClick={() => toast("Swap options will be available with meal generation.")} type="button">Swap</button>
+              <button className="rounded-lg p-2 text-[#8b8d80] transition hover:bg-[#f4f4ef] hover:text-[#4d523f]" onClick={() => onSwap(meal.day)} type="button" aria-label={`Swap ${meal.name}`}><MoreHorizontal className="h-4 w-4" /></button>
+              <button className="hidden rounded-xl border border-[#e2e2d8] px-3 py-2 text-xs font-bold text-[#596247] transition hover:border-[#c7cfb8] hover:bg-[#f4f6ed] sm:block" onClick={() => onSwap(meal.day)} type="button">Swap</button>
             </div>
           </article>
         ))}
@@ -457,8 +467,18 @@ function MealPlanPage({ goTo }: { goTo: (path: string) => void }) {
 }
 
 function GroceryListPage({ checked, toggleItem }: { checked: string[]; toggleItem: (id: string) => void }) {
-  const allItems = groceryGroups.flatMap((group) => group.items);
+  const [extraItems, setExtraItems] = useState<{ id: string; name: string; quantity: string; recipe: string }[]>([]);
+  const [newItem, setNewItem] = useState("");
+  const displayGroups = extraItems.length > 0 ? [...groceryGroups, { name: "Added just now", color: "bg-[#e7eef0] text-[#52777e]", items: extraItems }] : groceryGroups;
+  const allItems = displayGroups.flatMap((group) => group.items);
   const progress = Math.round((checked.length / allItems.length) * 100);
+  const addGroceryItem = () => {
+    const name = newItem.trim();
+    if (!name) return;
+    setExtraItems((previous) => [...previous, { id: `custom-${Date.now()}`, name, quantity: "1", recipe: "Added manually" }]);
+    setNewItem("");
+    toast.success(`${name} added to your list.`);
+  };
   const completeAll = () => {
     const ids = allItems.map((item) => item.id);
     if (checked.length === ids.length) {
@@ -500,7 +520,7 @@ function GroceryListPage({ checked, toggleItem }: { checked: string[]; toggleIte
         <button className="text-xs font-bold text-[#65754b] hover:text-[#3d4c2b]" onClick={completeAll} type="button">{checked.length === allItems.length ? "Clear all" : "Mark all"}</button>
       </div>
       <section className="mt-3 space-y-4">
-        {groceryGroups.map((group) => (
+        {displayGroups.map((group) => (
           <div className="overflow-hidden rounded-[1.35rem] border border-[#e4e1d9] bg-white shadow-[0_8px_22px_rgba(56,47,34,0.03)]" key={group.name}>
             <div className="flex items-center justify-between px-4 pb-2.5 pt-4 sm:px-5">
               <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em] ${group.color}`}>{group.name}</span>
@@ -522,7 +542,10 @@ function GroceryListPage({ checked, toggleItem }: { checked: string[]; toggleIte
           </div>
         ))}
       </section>
-      <button className="mt-5 flex w-full items-center justify-center gap-2 rounded-[1.1rem] border border-dashed border-[#cdd4bf] bg-[#f5f7f1] py-3.5 text-sm font-bold text-[#65754b] transition hover:bg-[#edf1e7]" onClick={() => toast("Add-item entry will save to your shared list once the backend is connected.")} type="button"><Plus className="h-4 w-4" /> Add something else</button>
+      <form className="mt-5 flex gap-2 rounded-[1.1rem] border border-dashed border-[#cdd4bf] bg-[#f5f7f1] p-2" onSubmit={(event) => { event.preventDefault(); addGroceryItem(); }}>
+        <input aria-label="Add a grocery item" className="min-w-0 flex-1 bg-transparent px-2 text-sm outline-none placeholder:text-[#a1a597]" onChange={(event) => setNewItem(event.target.value)} placeholder="Add something else" value={newItem} />
+        <button className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#e3ead7] px-3 py-2 text-xs font-bold text-[#617348] transition hover:bg-[#d9e3ca]" type="submit"><Plus className="h-4 w-4" /> Add</button>
+      </form>
     </>
   );
 }
@@ -558,9 +581,32 @@ function SettingsPage() {
   );
 }
 
+function CookMode({ meal, onClose }: { meal: Meal; onClose: () => void }) {
+  const [step, setStep] = useState(0);
+  const steps = [
+    `Prep your ingredients for ${meal.name.toLowerCase()}.`,
+    "Warm a large pan and cook the main ingredients until golden.",
+    "Add the sauce, toss everything together, and serve warm.",
+  ];
+  const isComplete = step === steps.length;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#1c2415]/45 p-0 backdrop-blur-sm sm:items-center sm:p-5" role="dialog" aria-modal="true" aria-label={`Cook ${meal.name}`}>
+      <div className="w-full max-w-lg rounded-t-[1.8rem] bg-[#fbfaf5] p-5 shadow-[0_25px_80px_rgba(20,28,15,0.28)] sm:rounded-[1.8rem] sm:p-7">
+        <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#76845d]">Cook mode</p><h2 className="mt-1 font-display text-2xl font-semibold tracking-[-0.045em] text-[#32372a]">{meal.name}</h2></div><button aria-label="Close cook mode" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef0e7] text-xl text-[#687253]" onClick={onClose} type="button">×</button></div>
+        <div className="mt-6 rounded-[1.25rem] bg-[#edf1e4] p-5"><div className="flex items-center justify-between text-xs font-bold text-[#687450]"><span>{isComplete ? "Ready to serve" : `Step ${step + 1} of ${steps.length}`}</span><span>{isComplete ? "100%" : `${Math.round((step / steps.length) * 100)}%`}</span></div><div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#d7dfc8]"><div className="h-full rounded-full bg-[#718456] transition-[width] duration-300" style={{ width: `${isComplete ? 100 : Math.max(8, (step / steps.length) * 100)}%` }} /></div><p className="mt-5 font-display text-xl leading-7 text-[#39432f]">{isComplete ? "Dinner is ready. Take the win." : steps[step]}</p></div>
+        <div className="mt-5 flex gap-2.5"><button className="soft-button flex-1 justify-center" onClick={onClose} type="button">Save for later</button><button className="primary-button flex-1 justify-center" onClick={() => setStep((current) => Math.min(steps.length, current + 1))} type="button">{isComplete ? "Done" : "Next step"}<ArrowRight className="h-4 w-4" /></button></div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [location, setLocation] = useLocation();
   const activePage = useAppPage(location);
+  const [meals, setMeals] = useState<Meal[]>(mealPlan);
+  const [cookingMeal, setCookingMeal] = useState<Meal | null>(null);
+  const [pantryExtras, setPantryExtras] = useState<string[]>([]);
   const [checkedGroceries, setCheckedGroceries] = useState<string[]>([]);
 
   const goTo = (path: string) => {
@@ -579,7 +625,17 @@ export default function Home() {
   };
 
   const addPantryItem = () => {
-    toast.success("Added cherry tomatoes to the demo pantry.", { description: "Changes live only in this frontend preview." });
+    const options = ["Cherry tomatoes", "Fresh basil", "Lemons"];
+    const item = options[pantryExtras.length % options.length];
+    setPantryExtras((previous) => [...previous, item]);
+    toast.success(`Added ${item.toLowerCase()} to your pantry.`, { description: "The demo updates instantly in this browser." });
+  };
+
+  const swapMeal = (day: string) => {
+    const alternative = swapAlternatives[day];
+    if (!alternative) return;
+    setMeals((previous) => previous.map((meal) => meal.day === day ? { ...meal, ...alternative } : meal));
+    toast.success(`${day}'s dinner swapped.`, { description: alternative.name });
   };
 
   const currentLabel = navItems.find((item) => item.id === activePage)?.label ?? "Today";
@@ -621,9 +677,9 @@ export default function Home() {
       <main className="pb-24 pt-7 lg:ml-[236px] lg:pb-12 lg:pt-10">
         <div className="mx-auto max-w-[1180px] px-4 sm:px-7 lg:px-8">
           <div className="page-enter">
-            {activePage === "dashboard" && <TodayPage goTo={goTo} />}
-            {activePage === "pantry" && <PantryPage addItem={addPantryItem} />}
-            {activePage === "meal-plan" && <MealPlanPage goTo={goTo} />}
+            {activePage === "dashboard" && <TodayPage goTo={goTo} meals={meals} onCook={setCookingMeal} onSwap={swapMeal} />}
+            {activePage === "pantry" && <PantryPage addItem={addPantryItem} addedItems={pantryExtras} />}
+            {activePage === "meal-plan" && <MealPlanPage goTo={goTo} meals={meals} onCook={setCookingMeal} onSwap={swapMeal} />}
             {activePage === "grocery-list" && <GroceryListPage checked={checkedGroceries} toggleItem={toggleGrocery} />}
             {activePage === "settings" && <SettingsPage />}
           </div>
@@ -637,6 +693,7 @@ export default function Home() {
           return <button className={`mobile-nav-button ${isActive ? "mobile-nav-active" : ""}`} key={item.id} onClick={() => goTo(item.path)} type="button"><span className={`flex h-7 w-7 items-center justify-center rounded-lg ${isActive ? "bg-[#e5ebd9]" : ""}`}><Icon className="h-4 w-4" /></span><span>{item.label === "Meal plan" ? "Plan" : item.label}</span></button>;
         })}
       </nav>
+      {cookingMeal && <CookMode meal={cookingMeal} onClose={() => setCookingMeal(null)} />}
     </div>
   );
 }
